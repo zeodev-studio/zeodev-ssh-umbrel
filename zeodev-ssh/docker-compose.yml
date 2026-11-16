@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+  app_proxy:
+    environment:
+      APP_HOST: zeodev-ssh_web_1
+      APP_PORT: 8080
+  web:
+    image: ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.1
+    restart: on-failure
+    init: true
+    stop_grace_period: 20s
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    environment:
+      ZEODEV_DATA_DIR: /data
+      ZEODEV_ALLOW_WEB_SETUP: "true"
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 384m
