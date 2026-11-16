@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 name: ZeoDev SSH
 tagline: Discover, organize and connect to your SSH servers
-icon: https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/icon.png
+icon: https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/icon.svg
 category: developer
 version: "0.1.2"
 port: 8164
@@ -29,10 +29,10 @@ website: https://studio.zeohost.pl
 repo: https://github.com/zeodev-studio/zeodev-ssh-umbrel
 support: https://github.com/zeodev-studio/zeodev-ssh-umbrel/issues
 gallery:
-  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/1.webp
-  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/2.webp
-  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/3.webp
-  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/4.webp
+  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/1.svg
+  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/2.svg
+  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/3.svg
+  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/4.svg
 releaseNotes: >-
   Adds a complete App Store gallery, detailed listing, release validation,
   container build tests, and installation troubleshooting documentation.
