@@ -8,12 +8,12 @@ ZeoDev SSH lets you save SSH hosts, discover SSH servers on private networks you
 
 ## Gallery
 
-![Host dashboard](zeodev-ssh/gallery/1.webp)
-![Automatic SSH discovery](zeodev-ssh/gallery/2.webp)
-![Network settings](zeodev-ssh/gallery/3.webp)
-![First-run setup](zeodev-ssh/gallery/4.webp)
+![Host dashboard](zeodev-ssh/gallery/1.svg)
+![Automatic SSH discovery](zeodev-ssh/gallery/2.svg)
+![Network settings](zeodev-ssh/gallery/3.svg)
+![First-run setup](zeodev-ssh/gallery/4.svg)
 
-*Gallery captures show the real UI in an empty, unconfigured state; they do not claim a live SSH connection.*
+*The SVG previews illustrate the actual app structure without fabricated SSH data. The `Generate real UI screenshots` workflow automatically generates true WebP captures from the app and replaces their URLs in the store manifest when it succeeds.*
 
 ## Native Umbrel installation
 
@@ -28,6 +28,10 @@ App ID: `zeodev-ssh` · App port: `8164` · Image: `ghcr.io/zeodev-studio/zeodev
 **IMPORTANT:** An existing stand-alone `zeodev-ssh` Docker container on port `8099` uses its own `zeodev_ssh_data` volume. Do not delete it or change that volume as part of installing this native app. The native app uses a separate Umbrel-managed data directory.
 
 ## Troubleshooting
+
+### Installation fails with HTTP 404 — manifest unknown
+
+This error comes from the container registry while Umbrel is trying to pull the image. It is not solved by reinstalling a shortcut. First verify that the `Build and publish ZeoDev SSH image` workflow completed successfully and that the exact tag `ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.2` exists. Then make the package **Public** in GitHub Packages (public repository visibility alone is not sufficient). Do **not** delete a working stand-alone container on port 8099.
 
 ### App icon appears but opening it fails
 
@@ -52,12 +56,12 @@ for id in $(docker ps -aq --filter 'name=zeodev-ssh_'); do
 
 ### Store listing shows an error in the gallery
 
-The manifest includes four real UI screenshots in `zeodev-ssh/gallery` and uses public raw GitHub URLs. Refresh the store or re-add the store after GitHub serves the updated manifest and screenshots.
+The manifest uses the committed `icon.svg` and four committed SVG previews, so they have no broken links. The gallery workflow replaces these preview URLs with actual `.webp` UI captures after a successful run. Refresh the Community App Store listing after the update is available.
 
 ## For maintainers
 
 - `src/`: FastAPI, SQLite, SSH connection logic, static responsive UI and tests
-- `zeodev-ssh/`: Umbrel package manifest, Docker Compose and actual gallery screenshots
+- `zeodev-ssh/`: Umbrel package manifest, Docker Compose, committed SVG gallery previews and automatically generated WebP screenshots
 - `.github/workflows/publish.yml`: validates tests and release version, then builds and publishes both AMD64 and ARM64 images to GHCR
 
 Run tests: `cd src && python -m pytest tests -q`.
