@@ -1,5 +1,8 @@
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/opt/zeodev
+LABEL org.opencontainers.image.source="https://github.com/zeodev-studio/zeodev-ssh-umbrel"
+LABEL org.opencontainers.image.title="ZeoDev SSH"
+LABEL org.opencontainers.image.description="Self-hosted SSH discovery and browser terminal for Umbrel"
 WORKDIR /opt/zeodev
 RUN groupadd --gid 1000 zeodev && useradd --uid 1000 --gid zeodev --system --no-create-home zeodev
 COPY requirements.txt ./requirements.txt
