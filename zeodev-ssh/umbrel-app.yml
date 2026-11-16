@@ -3,26 +3,39 @@ id: zeodev-ssh
 storage:
   dataRoot: data
 name: ZeoDev SSH
-tagline: Discover and manage SSH connections in one place
-icon: https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/icon.svg
+tagline: Discover, organize and connect to your SSH servers
+icon: https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/icon.png
 category: developer
-version: "0.1.1"
+version: "0.1.2"
 port: 8164
 description: >-
-  ZeoDev SSH lets you discover SSH servers on private networks,
-  save connection profiles, monitor host availability and open
-  SSH terminal sessions in your browser.
+  ZeoDev SSH is a simple, self-hosted SSH connection manager built for Umbrel.
+  Add your Linux, macOS, Windows OpenSSH or VPS hosts, check whether SSH
+  responds, and open secure terminal sessions directly from the browser.
 
-  Scan networks you administer, verify host fingerprints and
-  connect with a password or your private key. No external SaaS
-  or MCP server is required.
+
+  Start with automatic discovery of SSH servers on private networks you control,
+  or add custom hosts manually by address, port and username. An uncluttered
+  dashboard shows saved hosts, live SSH availability and sessions opened
+  through ZeoDev SSH. Passwords and private SSH keys are provided only when
+  connecting and are not saved in the database.
+
+
+  Everything runs on your Umbrel. No external account, cloud service or
+  third-party AI integration is required. First launch includes browser-based
+  administrator setup and SSH network configuration.
 developer: ZeoDev Studio
 website: https://studio.zeohost.pl
 repo: https://github.com/zeodev-studio/zeodev-ssh-umbrel
 support: https://github.com/zeodev-studio/zeodev-ssh-umbrel/issues
+gallery:
+  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/1.webp
+  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/2.webp
+  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/3.webp
+  - https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/gallery/4.webp
 releaseNotes: >-
-  Initial native Umbrel app packaging, first-run setup in the browser,
-  ZeoDev Studio branding and SSH host discovery.
+  Adds a complete App Store gallery, detailed listing, release validation,
+  container build tests, and installation troubleshooting documentation.
 dependencies: []
 path: ""
 defaultUsername: ""
