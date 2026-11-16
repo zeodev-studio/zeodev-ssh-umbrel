@@ -41,6 +41,22 @@ jobs:
           assert app['port'] == 8164
           print('Release metadata OK:', app['version'])
           PY_RELEASE
+      - name: Verify listing images are committed
+        run: |
+          python - <<'PY_ASSETS'
+          from pathlib import Path
+          import yaml
+          repo=Path('.')
+          manifest=yaml.safe_load((repo/'zeodev-ssh/umbrel-app.yml').read_text())
+          base='https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/'
+          for url in [manifest['icon'], *manifest.get('gallery',[])]:
+              assert url.startswith(base), f'Image must be hosted in this public repository: {url}'
+              asset=repo/url[len(base):]
+              assert asset.is_file(), f'Missing listing image: {asset}'
+              assert asset.stat().st_size > 100, f'Empty listing image: {asset}'
+          assert manifest['id']=='zeodev-ssh'
+          print('Icon and gallery validated')
+          PY_ASSETS
       - name: Test API and discovery
         working-directory: src
         run: python -m pytest tests -q
@@ -75,3 +91,33 @@ jobs:
             org.opencontainers.image.version=0.1.2
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Verify published manifest contains both architectures
+        run: |
+          docker buildx imagetools inspect ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.2 | tee /tmp/zeodev-image-manifest.txt
+          grep -q 'linux/amd64' /tmp/zeodev-image-manifest.txt
+          grep -q 'linux/arm64' /tmp/zeodev-image-manifest.txt
+      - name: Smoke-test released container
+        run: |
+          docker pull ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.2
+          docker volume create zeodev_ssh_ci_data
+          docker run -d --name zeodev-ssh-ci \
+            --read-only --tmpfs /tmp:rw,noexec,nosuid,size=16m \
+            -e ZEODEV_DATA_DIR=/data -e ZEODEV_ALLOW_WEB_SETUP=true \
+            -v zeodev_ssh_ci_data:/data \
+            -p 127.0.0.1:18080:8080 \
+            ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.2
+          for attempt in $(seq 1 25); do
+            if curl --fail --silent --show-error http://127.0.0.1:18080/health; then
+              echo
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs zeodev-ssh-ci
+          exit 1
+      - name: Clean up smoke-test container
+        if: always()
+        run: |
+          docker rm -f zeodev-ssh-ci 2>/dev/null || true
+          docker volume rm zeodev_ssh_ci_data 2>/dev/null || true
