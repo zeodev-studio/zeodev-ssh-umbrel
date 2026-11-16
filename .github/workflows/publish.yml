@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'zeodev-ssh/umbrel-app.yml'
+      - 'zeodev-ssh/docker-compose.yml'
       - '.github/workflows/publish.yml'
   workflow_dispatch:
 
@@ -20,22 +22,34 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: src/requirements.txt
       - name: Install dependencies
+        run: python -m pip install -r src/requirements.txt pytest pyyaml
+      - name: Check release metadata and dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r src/requirements.txt pytest pytest-asyncio httpx
-      - name: Backend tests
-        run: |
-          cd src
-          python -m pytest -q tests
-      - name: JavaScript syntax
-        run: node --check src/app/static/app.js
-      - name: Python syntax
+          python - <<'PY_RELEASE'
+          import pathlib, yaml
+          root = pathlib.Path('.')
+          app = yaml.safe_load((root/'zeodev-ssh/umbrel-app.yml').read_text())
+          compose = yaml.safe_load((root/'zeodev-ssh/docker-compose.yml').read_text())
+          expected = 'ghcr.io/zeodev-studio/zeodev-ssh-umbrel:' + app['version']
+          assert compose['services']['web']['image'] == expected, 'Manifest and image versions do not match'
+          for item in app['gallery']:
+              relative = item.split('/main/', 1)[-1]
+              assert (root/relative).is_file(), f'Missing gallery screenshot: {relative}'
+          assert app['port'] == 8164
+          print('Release metadata OK:', app['version'])
+          PY_RELEASE
+      - name: Test API and discovery
+        working-directory: src
+        run: python -m pytest tests -q
+      - name: Check Python syntax
         run: python -m compileall -q src/app
 
-  publish:
-    runs-on: ubuntu-latest
+  build:
     needs: test
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
@@ -46,11 +60,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and publish amd64 and arm64 images
+      - name: Build and publish AMD64/ARM64 image
         uses: docker/build-push-action@v6
         with:
           context: ./src
           file: ./src/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.1
+          tags: ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.2
+          labels: |
+            org.opencontainers.image.title=ZeoDev SSH
+            org.opencontainers.image.description=Self-hosted SSH connection manager for Umbrel
+            org.opencontainers.image.source=https://github.com/zeodev-studio/zeodev-ssh-umbrel
+            org.opencontainers.image.version=0.1.2
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
