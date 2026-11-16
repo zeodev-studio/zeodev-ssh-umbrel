@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05070a">
+  <meta name="description" content="ZeoDev SSH — panel urządzeń SSH i wykrywanie w sieci lokalnej">
+  <title>ZeoDev SSH</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+  <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+  <section id="setup-screen" class="auth-screen" hidden>
+    <div class="auth-card">
+      <img class="brand-logo large" src="/static/icon.svg" alt="ZeoDev Studio">
+      <p class="eyebrow">ZEO<span>DEV</span> STUDIO</p>
+      <h1>Skonfiguruj ZeoDev SSH</h1>
+      <p class="muted">Ustaw hasło administratora. Konfigurację wykonuj tylko po zalogowaniu do Umbrela.</p>
+      <form id="setup-form" class="stack">
+        <label for="setup-password">Nowe hasło (co najmniej 16 znaków)</label>
+        <input id="setup-password" type="password" minlength="16" autocomplete="new-password" required>
+        <label for="setup-password-confirm">Powtórz hasło</label>
+        <input id="setup-password-confirm" type="password" minlength="16" autocomplete="new-password" required>
+        <button class="btn primary" type="submit">Utwórz administratora</button>
+      </form>
+      <p class="footnote">Po konfiguracji możesz dodać sieć do wykrywania SSH w Ustawieniach.</p>
+    </div>
+  </section>
+  <section id="login-screen" class="auth-screen" hidden>
+    <div class="auth-card">
+      <img class="brand-logo large" src="/static/icon.svg" alt="ZeoDev Studio">
+      <p class="eyebrow">ZEO<span>DEV</span> STUDIO</p>
+      <h1>Witaj w ZeoDev SSH</h1>
+      <p class="muted">Zarządzaj połączeniami SSH w swojej sieci. Zaloguj się hasłem administratora z instalacji.</p>
+      <form id="login-form" class="stack">
+        <label for="login-password">Hasło administratora</label>
+        <input id="login-password" type="password" autocomplete="current-password" required autofocus>
+        <button class="btn primary" type="submit">Zaloguj się <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="footnote">Aplikacja działa lokalnie. Nie udostępniaj jej portu bezpośrednio w internecie.</p>
+    </div>
+  </section>
+  <div id="app-shell" class="shell" hidden>
+    <aside class="sidebar">
+      <div class="brand"><img class="brand-logo" src="/static/icon.svg" alt=""><div><div class="brand-name">ZeoDev <span>SSH</span></div><small>CONNECTION MANAGER</small></div></div>
+      <nav class="nav" aria-label="Menu aplikacji">
+        <button data-view="devices" class="nav-link active"><span class="nav-glyph">▦</span> Urządzenia</button>
+        <button data-view="discovery" class="nav-link"><span class="nav-glyph">◎</span> Wykryte SSH <span id="discovery-count" class="count">0</span></button>
+        <button data-view="settings" class="nav-link"><span class="nav-glyph">⚙</span> Ustawienia</button>
+      </nav>
+      <div class="sidebar-bottom"><span class="online-dot"></span> Umbrel · instalacja lokalna <button id="logout-btn" class="icon-button" title="Wyloguj">⎋</button></div>
+    </aside>
+    <div class="workarea">
+      <header class="topbar"><div class="topbar-title">ZeoDev SSH <span class="mobile-muted">/</span> <strong id="breadcrumb">Urządzenia</strong></div><div class="topbar-right"><span class="status-dot"></span><span>Panel lokalny</span></div></header>
+      <main class="content">
+        <section data-page="devices" class="page">
+          <div class="page-heading"><div><p class="eyebrow">TWOJE URZĄDZENIA</p><h1>Połączenia SSH</h1><p class="muted">Dodawaj serwery, sprawdzaj dostępność i łącz się z nimi.</p></div><button id="add-host-btn" class="btn primary"><span>＋</span> Dodaj SSH</button></div>
+          <div class="stats">
+            <div class="stat"><div class="stat-caption">Zapisane urządzenia</div><div id="stat-hosts" class="stat-value">—</div><div class="stat-foot">Twoja lista połączeń</div></div>
+            <div class="stat"><div class="stat-caption">SSH dostępne</div><div id="stat-online" class="stat-value">—</div><div class="stat-foot">Sprawdzono odpowiedź SSH</div></div>
+            <div class="stat"><div class="stat-caption">Aktywne sesje</div><div id="stat-sessions" class="stat-value">—</div><div class="stat-foot">Terminale otwarte w ZeoDev</div></div>
+          </div>
+          <div class="section-line"><h2>Moje urządzenia</h2><button id="refresh-btn" class="btn ghost small">↻ Odśwież</button></div>
+          <div id="host-list" class="device-list"></div>
+          <div class="section-line sessions-head"><h2>Aktywne sesje</h2></div>
+          <div id="sessions-list" class="sessions-list empty-small">Brak aktywnych sesji SSH.</div>
+        </section>
+        <section data-page="discovery" class="page" hidden>
+          <div class="page-heading"><div><p class="eyebrow">AUTOMATYCZNE WYKRYWANIE</p><h1>Urządzenia w sieci</h1><p class="muted">Znajdź komputery, które mają już włączony serwer SSH.</p></div><button id="scan-btn" class="btn primary">◎ Skanuj sieć</button></div>
+          <div class="info-box"><div class="info-icon">ⓘ</div><div>Wykrywanie sprawdza tylko port 22 w ustawionych sieciach prywatnych. Nie instaluje ani nie włącza SSH na innych urządzeniach. Komputery z innym portem dodaj ręcznie.</div></div>
+          <div class="section-line"><h2>Wykryte serwery SSH</h2><span id="last-scan" class="muted small-text">Oczekiwanie na skanowanie</span></div>
+          <div id="discovered-list" class="device-list"></div>
+        </section>
+        <section data-page="settings" class="page" hidden>
+          <div class="page-heading"><div><p class="eyebrow">KONFIGURACJA</p><h1>Ustawienia</h1><p class="muted">Dostosuj zakres wykrywania urządzeń i zabezpiecz dostęp.</p></div></div>
+          <div class="settings-card"><h2>Sieć do skanowania</h2><p class="muted">Zakres jest wykrywany przy instalacji. Możesz go zmienić, jeśli masz inną podsieć lub kilka sieci.</p><form id="network-form" class="stack"><label for="scan-cidrs">Zakresy IPv4 (CIDR), oddzielone przecinkami</label><input id="scan-cidrs" placeholder="np. 192.168.1.0/24" autocapitalize="none" spellcheck="false"><p class="footnote">Tylko prywatne zakresy IPv4. Maksymalnie cztery sieci po 256 adresów. Zawsze skanuj tylko sieci, którymi zarządzasz.</p><div><button class="btn primary" type="submit">Zapisz zakres</button></div></form></div>
+          <div class="settings-card"><h2>Zmiana hasła administratora</h2><form id="password-form" class="stack"><label for="current-password">Aktualne hasło</label><input id="current-password" type="password" autocomplete="current-password" required><label for="new-password">Nowe hasło (minimum 16 znaków)</label><input id="new-password" type="password" minlength="16" autocomplete="new-password" required><div><button class="btn secondary" type="submit">Zmień hasło</button></div></form></div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <dialog id="host-dialog" class="modal"><form id="host-form" class="modal-inner"><div class="modal-heading"><div><p class="eyebrow">KONFIGURACJA SSH</p><h2 id="host-dialog-title">Dodaj urządzenie</h2></div><button type="button" class="close-btn" data-close="host-dialog" aria-label="Zamknij">×</button></div><label for="host-name">Nazwa urządzenia</label><input id="host-name" placeholder="np. Mini PC" required maxlength="80"><label for="host-address">Adres IP lub domena</label><input id="host-address" placeholder="np. 192.168.1.100" required maxlength="253" autocapitalize="none" spellcheck="false"><div class="two-cols"><div><label for="host-port">Port SSH</label><input id="host-port" type="number" min="1" max="65535" value="22" required></div><div><label for="host-user">Użytkownik SSH</label><input id="host-user" placeholder="np. patryk" required autocapitalize="none" spellcheck="false"></div></div><p class="footnote">Hasło i klucz SSH podajesz dopiero przy łączeniu. Nie są zapisywane w bazie.</p><div class="modal-actions"><button type="button" class="btn ghost" data-close="host-dialog">Anuluj</button><button type="submit" class="btn primary">Zapisz urządzenie</button></div></form></dialog>
+  <dialog id="terminal-dialog" class="modal terminal-modal"><div class="terminal-modal-inner"><div class="modal-heading"><div><p class="eyebrow">TERMINAL SSH · WERSJA PODSTAWOWA</p><h2 id="terminal-title">Połącz z serwerem</h2></div><button type="button" class="close-btn" data-close="terminal-dialog" aria-label="Zamknij">×</button></div><div id="terminal-auth" class="stack"><label for="ssh-auth-type">Sposób logowania</label><select id="ssh-auth-type"><option value="password">Hasło SSH</option><option value="privateKey">Klucz prywatny SSH</option></select><div id="password-auth"><label for="ssh-password">Hasło SSH</label><input id="ssh-password" type="password" autocomplete="off" placeholder="Hasło do wybranego urządzenia"></div><div id="key-auth" hidden><label for="ssh-private-key">Klucz prywatny (PEM / OpenSSH)</label><textarea id="ssh-private-key" rows="5" spellcheck="false" autocapitalize="none"></textarea><label for="ssh-passphrase">Hasło do klucza (jeśli jest)</label><input id="ssh-passphrase" type="password"></div><p class="footnote">Przy pierwszym łączeniu sprawdź i zatwierdź fingerprint klucza serwera.</p><button id="terminal-connect-btn" class="btn primary">Połącz SSH</button></div><div id="terminal-workspace" hidden><div id="terminal-connection-status" class="terminal-status">Łączenie…</div><pre id="terminal-output" class="terminal-output" aria-label="Wyjście terminala" tabindex="0"></pre><div class="terminal-input-row"><span class="prompt-mark">›</span><input id="terminal-input" placeholder="Wpisz polecenie i Enter" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Polecenie SSH"><button id="terminal-ctrl-c" class="btn ghost small" title="Przerwij polecenie">Ctrl+C</button></div><p class="footnote">To podstawowy terminal tekstowy. Programy pełnoekranowe (np. vim, htop) wymagają pełnego emulatora terminala.</p></div></div></dialog>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
