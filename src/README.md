@@ -1,0 +1,1 @@
+Source code for ZeoDev SSH native Umbrel app. Build a container image from this directory. Install with the package in `../zeodev-ssh/` through the Umbrel App Store, not by running Docker Compose manually.
