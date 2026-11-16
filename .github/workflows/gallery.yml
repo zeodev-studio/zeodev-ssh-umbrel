@@ -23,11 +23,23 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Render actual app UI without fabricated SSH data
         run: python scripts/generate_gallery.py
+      - name: Prefer actual screenshots once generated
+        run: |
+          python - <<'PY_GALLERY'
+          from pathlib import Path
+          manifest=Path('zeodev-ssh/umbrel-app.yml')
+          text=manifest.read_text()
+          for index in range(1,5):
+              name=f'zeodev-ssh/gallery/{index}'
+              assert Path(name+'.webp').is_file(), f'Missing screenshot: {name}'
+              text=text.replace(name+'.svg',name+'.webp')
+          manifest.write_text(text)
+          PY_GALLERY
       - name: Commit screenshots to app gallery
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add zeodev-ssh/gallery/*.webp
+          git add zeodev-ssh/gallery/*.webp zeodev-ssh/umbrel-app.yml
           if git diff --cached --quiet; then
             echo 'Gallery is already up to date.'
           else
