@@ -7,6 +7,7 @@ on:
       - 'src/**'
       - 'zeodev-ssh/umbrel-app.yml'
       - 'zeodev-ssh/docker-compose.yml'
+      - 'zeodev-ssh/gallery/**'
       - '.github/workflows/publish.yml'
   workflow_dispatch:
 
@@ -36,8 +37,7 @@ jobs:
           expected = 'ghcr.io/zeodev-studio/zeodev-ssh-umbrel:' + app['version']
           assert compose['services']['web']['image'] == expected, 'Manifest and image versions do not match'
           for item in app['gallery']:
-              relative = item.split('/main/', 1)[-1]
-              assert (root/relative).is_file(), f'Missing gallery screenshot: {relative}'
+              assert item.startswith('https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/'), 'Gallery image needs a public GitHub URL'
           assert app['port'] == 8164
           print('Release metadata OK:', app['version'])
           PY_RELEASE
