@@ -1,48 +1,65 @@
-# ZeoDev SSH
-
-**Native Umbrel App Store package — not a URL shortcut.**
+# ZeoDev SSH — Umbrel Community App Store
 
 [![Build and publish](https://github.com/zeodev-studio/zeodev-ssh-umbrel/actions/workflows/publish.yml/badge.svg)](https://github.com/zeodev-studio/zeodev-ssh-umbrel/actions/workflows/publish.yml)
 
-A self-hosted SSH connection manager from **ZeoDev Studio**, with saved hosts, authorized private-network discovery, server availability monitoring, a browser-based SSH terminal, and first-run administrator setup.
+Self-hosted SSH connection manager by **ZeoDev Studio** for Umbrel OS 2.0.
 
-## Install on umbrelOS 2.0
+ZeoDev SSH lets you save SSH hosts, discover SSH servers on private networks you administer, check whether a host responds, and open a browser terminal. Passwords and SSH keys are provided at connect time and are not saved in the application's database. A separate login protects the web panel.
 
-1. Verify the [GitHub Actions build](https://github.com/zeodev-studio/zeodev-ssh-umbrel/actions/workflows/publish.yml) completed successfully.
-2. Verify that the image `ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.1` exists and its GitHub package visibility is **Public**. A public repository by itself does not automatically make the container image public.
-3. Go to **Umbrel → App Store → Community App Stores** and add `https://github.com/zeodev-studio/zeodev-ssh-umbrel`.
-4. Open the **ZeoDev Studio** community store and install **ZeoDev SSH**.
-5. Open the application, choose an administrator password and configure the private CIDR range that you are authorized to scan, e.g. `192.168.1.0/24`.
+## Gallery
 
-## Existing standalone installation
+![Host dashboard](zeodev-ssh/gallery/1.webp)
+![Automatic SSH discovery](zeodev-ssh/gallery/2.webp)
+![Network settings](zeodev-ssh/gallery/3.webp)
+![First-run setup](zeodev-ssh/gallery/4.webp)
 
-This is an **independent Umbrel-managed app**. It does **not** modify, delete, replace or migrate the previous standalone Docker container on port `8099` or the Docker volume `zeodev_ssh_data`.
+*Gallery captures show the real UI in an empty, unconfigured state; they do not claim a live SSH connection.*
 
-The app store installation uses app port `8164` and its own persistent Umbrel data directory. Do not bind both instances to one SQLite database. Data migration can be planned after successful installation and verification.
+## Native Umbrel installation
 
-## Repository
+1. Confirm that the [GitHub Actions build](https://github.com/zeodev-studio/zeodev-ssh-umbrel/actions/workflows/publish.yml) for version `0.1.2` succeeded.
+2. The published GHCR image must be **Public** under GitHub Packages. This is a one-time visibility setting for the package, not for the repository. A public repository alone does **not** make its container packages public.
+3. On Umbrel: **App Store → Community App Stores → Add** `https://github.com/zeodev-studio/zeodev-ssh-umbrel`.
+4. Open **ZeoDev SSH → Install**. Umbrel then **automatically pulls the published Docker image, starts the container and sets up its app proxy**. You do not need to use `docker compose` or build an image manually on the Umbrel host.
+5. Open the app on the Umbrel desktop, create an administrator password, then configure a private scan subnet in Settings.
 
-- `src/app/`: Python backend and browser UI.
-- `src/tests/`: backend tests.
-- `src/Dockerfile`: versioned application image.
-- `zeodev-ssh/`: native Umbrel manifest, Docker Compose, ZeoDev brand icon.
-- `umbrel-app-store.yml`: community store identity.
-- `.github/workflows/publish.yml`: CI tests and AMD64/ARM64 publishing.
+App ID: `zeodev-ssh` · App port: `8164` · Image: `ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.2`.
 
-### Development checks
+**IMPORTANT:** An existing stand-alone `zeodev-ssh` Docker container on port `8099` uses its own `zeodev_ssh_data` volume. Do not delete it or change that volume as part of installing this native app. The native app uses a separate Umbrel-managed data directory.
+
+## Troubleshooting
+
+### App icon appears but opening it fails
+
+Opening an app is not proof that its underlying container is healthy. Check the install state and errors in the Umbrel App Store, then run the following **read-only** diagnostics over SSH on your Umbrel:
 
 ```bash
-python -m pip install -r src/requirements.txt pytest pytest-asyncio httpx
-cd src
-python -m pytest -q tests
-node --check app/static/app.js
+docker ps -a --format 'table {{.Names}}	{{.Image}}	{{.Status}}	{{.Ports}}' | grep -E 'NAMES|zeodev-ssh'
+docker image ls 'ghcr.io/zeodev-studio/zeodev-ssh-umbrel'
+curl -sS -i --max-time 5 http://127.0.0.1:8164/health || true
 ```
 
-## Security and current limitations
+Check application/proxy logs for containers whose names begin with `zeodev-ssh_`:
 
-- SSH credentials are sent only to the currently opened session, not persisted in the application database.
-- Unknown host keys require user approval, and pinned fingerprints prevent silent replacement.
-- Discovery is restricted to configured private IPv4 networks, by default port 22; do not scan networks without authorization.
-- The app lists SSH sessions opened through ZeoDev SSH. Detecting unrelated system SSH sessions on other computers would require separate authorized access.
-- Treat the first-run setup screen as privileged: configure the first administrator promptly after installation. Do not expose the installation or login to the public internet.
-- The web terminal in v0.1.1 is intentionally a basic text console, not a full ANSI emulator.
+```bash
+for id in $(docker ps -aq --filter 'name=zeodev-ssh_'); do
+  echo "--- $(docker inspect --format '{{.Name}}' "$id") ---"
+  docker logs --tail 60 "$id" 2>&1
+ done
+```
+
+**If the image is missing or the logs mention `401 Unauthorized`**, confirm the GHCR package visibility is Public. **If the image is present but the container exits**, inspect the actual error in the container logs (e.g. permissions for the mapped `/data` folder). **If it works at the LAN address but not over Tailscale**, check the client connection/Tailscale routing instead of rebuilding the container. Do not delete the old port-8099 container while diagnosing.
+
+### Store listing shows an error in the gallery
+
+The manifest includes four real UI screenshots in `zeodev-ssh/gallery` and uses public raw GitHub URLs. Refresh the store or re-add the store after GitHub serves the updated manifest and screenshots.
+
+## For maintainers
+
+- `src/`: FastAPI, SQLite, SSH connection logic, static responsive UI and tests
+- `zeodev-ssh/`: Umbrel package manifest, Docker Compose and actual gallery screenshots
+- `.github/workflows/publish.yml`: validates tests and release version, then builds and publishes both AMD64 and ARM64 images to GHCR
+
+Run tests: `cd src && python -m pytest tests -q`.
+
+Release procedure: bump the image tag, manifest version and Actions tag together. Confirm the registry image is publicly pullable before updating Umbrel. Never publish `.env`, credentials, SSH private keys or databases.
