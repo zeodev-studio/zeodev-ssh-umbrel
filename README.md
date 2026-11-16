@@ -17,7 +17,7 @@ ZeoDev SSH lets you save SSH hosts, discover SSH servers on private networks you
 
 ## Native Umbrel installation
 
-1. Confirm that the [GitHub Actions build](https://github.com/zeodev-studio/zeodev-ssh-umbrel/actions/workflows/publish.yml) for version `0.1.2` succeeded.
+1. Confirm that the [GitHub Actions build](https://github.com/zeodev-studio/zeodev-ssh-umbrel/actions/workflows/publish.yml) for version `0.1.2` succeeded. In particular, `Build and publish AMD64/ARM64 image`, `Smoke-test released container`, and `Verify public pull for Umbrel` must pass. The last job checks a pull from a fresh runner **without** GitHub authentication.
 2. The published GHCR image must be **Public** under GitHub Packages. This is a one-time visibility setting for the package, not for the repository. A public repository alone does **not** make its container packages public.
 3. On Umbrel: **App Store → Community App Stores → Add** `https://github.com/zeodev-studio/zeodev-ssh-umbrel`.
 4. Open **ZeoDev SSH → Install**. Umbrel then **automatically pulls the published Docker image, starts the container and sets up its app proxy**. You do not need to use `docker compose` or build an image manually on the Umbrel host.
