@@ -121,3 +121,12 @@ jobs:
         run: |
           docker rm -f zeodev-ssh-ci 2>/dev/null || true
           docker volume rm zeodev_ssh_ci_data 2>/dev/null || true
+
+  public-pull:
+    name: Verify public pull for Umbrel
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull image anonymously (no GitHub credentials)
+        run: |
+          docker pull ghcr.io/zeodev-studio/zeodev-ssh-umbrel:0.1.2
