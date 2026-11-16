@@ -1,0 +1,29 @@
+manifestVersion: 1
+id: zeodev-ssh
+storage:
+  dataRoot: data
+name: ZeoDev SSH
+tagline: Discover and manage SSH connections in one place
+icon: https://raw.githubusercontent.com/zeodev-studio/zeodev-ssh-umbrel/main/zeodev-ssh/icon.svg
+category: developer
+version: "0.1.1"
+port: 8164
+description: >-
+  ZeoDev SSH lets you discover SSH servers on private networks,
+  save connection profiles, monitor host availability and open
+  SSH terminal sessions in your browser.
+
+  Scan networks you administer, verify host fingerprints and
+  connect with a password or your private key. No external SaaS
+  or MCP server is required.
+developer: ZeoDev Studio
+website: https://studio.zeohost.pl
+repo: https://github.com/zeodev-studio/zeodev-ssh-umbrel
+support: https://github.com/zeodev-studio/zeodev-ssh-umbrel/issues
+releaseNotes: >-
+  Initial native Umbrel app packaging, first-run setup in the browser,
+  ZeoDev Studio branding and SSH host discovery.
+dependencies: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
